@@ -179,6 +179,9 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
     @synchronized(self) {
         if (!_sessionKey) {
             _sessionKey = self.keychain[AWSCredentialsProviderKeychainSessionToken];
+            if (_sessionKey) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
+            }
         }
         return _sessionKey;
     }
@@ -214,6 +217,9 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
     @synchronized(self) {
         _sessionKey = sessionKey;
         self.keychain[AWSCredentialsProviderKeychainSessionToken] = sessionKey;
+        if (sessionKey) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
+        }
     }
 }
 
@@ -605,6 +611,9 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
     @synchronized(self) {
         if (!_sessionKey) {
             _sessionKey = self.keychain[AWSCredentialsProviderKeychainSessionToken];
+            if (_sessionKey) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
+            }
         }
         return _sessionKey;
     }
@@ -647,6 +656,9 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
     @synchronized(self) {
         _sessionKey = sessionKey;
         self.keychain[AWSCredentialsProviderKeychainSessionToken] = sessionKey;
+        if (sessionKey) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
+        }
     }
 }
 
