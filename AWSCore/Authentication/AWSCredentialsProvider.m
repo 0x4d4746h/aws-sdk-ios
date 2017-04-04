@@ -236,7 +236,9 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
                                                                       secretKey:self.keychain[AWSCredentialsProviderKeychainSecretAccessKey]
                                                                      sessionKey:self.keychain[AWSCredentialsProviderKeychainSessionToken]
                                                                      expiration:expiration];
-
+        if (credentials.sessionKey) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
+        }
         return credentials;
     }
 
@@ -253,6 +255,10 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
         self.keychain[AWSCredentialsProviderKeychainExpiration] = [NSString stringWithFormat:@"%f", [internalCredentials.expiration timeIntervalSince1970]];
     } else {
         self.keychain[AWSCredentialsProviderKeychainExpiration] = nil;
+    }
+
+    if (internalCredentials.sessionKey) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
     }
 }
 
@@ -532,20 +538,20 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
         && [self.internalCredentials.expiration compare:[NSDate dateWithTimeIntervalSinceNow:10 * 60]] == NSOrderedDescending) {
         return [AWSTask taskWithResult:self.internalCredentials];
     }
-    
+
     id<AWSCognitoCredentialsProviderHelper> providerRef = self.identityProvider;
     return [[[providerRef logins] continueWithExecutor:self.refreshExecutor withSuccessBlock:^id _Nullable(AWSTask<NSDictionary<NSString *,NSString *> *> * _Nonnull task) {
         NSDictionary<NSString *,NSString *> *logins = task.result;
-        
+
         AWSTask * getIdentityIdTask = nil;
-        
+
         if(!providerRef.identityId){
             getIdentityIdTask = [self getIdentityId];
         }else {
             self.identityId = providerRef.identityId;
             getIdentityIdTask = [AWSTask taskWithResult:nil];
         }
-        
+
         return [getIdentityIdTask continueWithSuccessBlock:^id _Nullable(AWSTask * _Nonnull task) {
             // Refreshes the credentials if any of the following is true:
             // 1. The cached logins are different from the one the identity provider provided.
@@ -556,7 +562,7 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
                 && [self.internalCredentials.expiration compare:[NSDate dateWithTimeIntervalSinceNow:10 * 60]] == NSOrderedDescending) {
                 return [AWSTask taskWithResult:self.internalCredentials];
             }
-            
+
             if (self.isRefreshingCredentials) {
                 // Waits up to 60 seconds for the Google SDK to refresh a token.
                 if (dispatch_semaphore_wait(self.semaphore, dispatch_time(DISPATCH_TIME_NOW, 60 * NSEC_PER_SEC)) != 0) {
@@ -566,16 +572,16 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
                     return [AWSTask taskWithError:error];
                 }
             }
-            
+
             if ((!self.cachedLogins || [self.cachedLogins isEqualToDictionary:logins])
                 && self.internalCredentials
                 && [self.internalCredentials.expiration compare:[NSDate dateWithTimeIntervalSinceNow:10 * 60]] == NSOrderedDescending) {
                 return [AWSTask taskWithResult:self.internalCredentials];
             }
-            
+
             self.refreshingCredentials = YES;
             self.cachedLogins = logins;
-            
+
             if (self.useEnhancedFlow) {
                 NSString * customRoleArn = nil;
                 if([providerRef.identityProviderManager respondsToSelector:@selector(customRoleArn)]){
@@ -588,16 +594,16 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
                 return [self getCredentialsWithSTS:logins
                                      authenticated:[providerRef isAuthenticated]];
             }
-            
+
         }];
     }] continueWithBlock:^id(AWSTask *task) {
         if (task.error) {
             AWSLogError(@"Unable to refresh. Error is [%@]", task.error);
         }
-        
+
         self.refreshingCredentials = NO;
         dispatch_semaphore_signal(self.semaphore);
-        
+
         return task;
     }];
 }
@@ -706,6 +712,9 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
                                                                       secretKey:self.keychain[AWSCredentialsProviderKeychainSecretAccessKey]
                                                                      sessionKey:self.keychain[AWSCredentialsProviderKeychainSessionToken]
                                                                      expiration:expiration];
+        if (credentials.sessionKey) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
+        }
         return credentials;
     }
 
@@ -722,6 +731,9 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
         self.keychain[AWSCredentialsProviderKeychainExpiration] = [NSString stringWithFormat:@"%f", [internalCredentials.expiration timeIntervalSince1970]];
     } else {
         self.keychain[AWSCredentialsProviderKeychainExpiration] = nil;
+    }
+    if (internalCredentials.sessionKey) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
     }
 }
 

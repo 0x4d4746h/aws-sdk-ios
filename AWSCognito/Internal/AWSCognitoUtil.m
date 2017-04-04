@@ -208,4 +208,8 @@
     return [NSString stringWithFormat:@"Cognito-%@-DeviceIdentity", [AWSCognitoUtil pushPlatformString:pushPlatform]];
 }
 
++ (NSString *) devicePushTokenKey:(AWSCognitoSyncPlatform) pushPlatform {
+    return [NSString stringWithFormat:@"Cognito-%@-DevicePushToken", [AWSCognitoUtil pushPlatformString:pushPlatform]];
+}
+
 @end
