@@ -236,9 +236,6 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
                                                                       secretKey:self.keychain[AWSCredentialsProviderKeychainSecretAccessKey]
                                                                      sessionKey:self.keychain[AWSCredentialsProviderKeychainSessionToken]
                                                                      expiration:expiration];
-        if (credentials.sessionKey) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
-        }
         return credentials;
     }
 
@@ -255,10 +252,6 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
         self.keychain[AWSCredentialsProviderKeychainExpiration] = [NSString stringWithFormat:@"%f", [internalCredentials.expiration timeIntervalSince1970]];
     } else {
         self.keychain[AWSCredentialsProviderKeychainExpiration] = nil;
-    }
-
-    if (internalCredentials.sessionKey) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
     }
 }
 
@@ -712,9 +705,6 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
                                                                       secretKey:self.keychain[AWSCredentialsProviderKeychainSecretAccessKey]
                                                                      sessionKey:self.keychain[AWSCredentialsProviderKeychainSessionToken]
                                                                      expiration:expiration];
-        if (credentials.sessionKey) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
-        }
         return credentials;
     }
 
@@ -731,9 +721,6 @@ static NSString *const AWSCredentialsProviderKeychainIdentityId = @"identityId";
         self.keychain[AWSCredentialsProviderKeychainExpiration] = [NSString stringWithFormat:@"%f", [internalCredentials.expiration timeIntervalSince1970]];
     } else {
         self.keychain[AWSCredentialsProviderKeychainExpiration] = nil;
-    }
-    if (internalCredentials.sessionKey) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"session_key_force_sync" object:nil];
     }
 }
 
